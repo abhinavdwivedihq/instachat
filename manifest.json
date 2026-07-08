@@ -1,0 +1,17 @@
+{
+  "name": "instaChat",
+  "short_name": "instaChat",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e056fd",
+  "theme_color": "#2980b9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
