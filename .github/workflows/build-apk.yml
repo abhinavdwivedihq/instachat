@@ -38,11 +38,16 @@ jobs:
           # Copy your website files into Cordova's asset folder
           rm -rf www/*
           cp -r ../* www/ || true
-          rm -rf www/myapp # avoid recursive loop
+          rm -rf www/myapp
           
-          # Copy logo if it exists
+          # Fix the Logo / Icon implementation for Android
           if [ -f "../logo.png" ]; then
             cp ../logo.png www/logo.png
+            # Injecting icon config directly into Cordova's config.xml
+            sed -i '/<\/widget>/i \    <icon src="www/logo.png" \/>' config.xml
+          elif [ -f "../logo.jpg" ]; then
+            cp ../logo.jpg www/logo.png
+            sed -i '/<\/widget>/i \    <icon src="www/logo.png" \/>' config.xml
           fi
           
           # Build the APK
