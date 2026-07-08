@@ -40,13 +40,9 @@ jobs:
           cp -r ../* www/ || true
           rm -rf www/myapp
           
-          # Fix the Logo / Icon implementation for Android
-          if [ -f "../logo.png" ]; then
-            cp ../logo.png www/logo.png
-            # Injecting icon config directly into Cordova's config.xml
-            sed -i '/<\/widget>/i \    <icon src="www/logo.png" \/>' config.xml
-          elif [ -f "../logo.jpg" ]; then
-            cp ../logo.jpg www/logo.png
+          # Direct target your exact logo name
+          if [ -f "../IMG_20260707_141932.png" ]; then
+            cp ../IMG_20260707_141932.png www/logo.png
             sed -i '/<\/widget>/i \    <icon src="www/logo.png" \/>' config.xml
           fi
           
