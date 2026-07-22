@@ -1,7 +1,5 @@
-name: Build InstaChat APK
-
+name: Build Android APK
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,21 +7,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -31,39 +28,39 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create Android App
+      - name: Create App and Build APK
         run: |
-          cordova create myapp com.abhinav.instachat InstaChat
+          # Fresh project initialize
+          cordova create myapp com.abhinav.instachat instaChat
           cd myapp
-
           cordova platform add android
-
+          
+          # Copy your main website files
           rm -rf www/*
-
-          cp ../index.html www/index.html
-
-          if [ -f ../manifest.json ]; then
-            cp ../manifest.json www/manifest.json
-          fi
-
-          if [ -f ../splash.png ]; then
-            cp ../splash.png www/splash.png
-          fi
-
+          cp -r ../* www/ || true
+          rm -rf www/myapp
+          
+          # Perfect Logo Scaling Strategy (Fixing the small icon issue)
           if [ -f "../IMG_20260707_141932.png" ]; then
-            cp "../IMG_20260707_141932.png" www/logo.png
+            cp ../IMG_20260707_141932.png www/logo.png
+            
+            # 1. Inject Standard Icon Configuration
+            sed -i '/<\/widget>/i \    <icon src="www/logo.png" \/>' config.xml
+            
+            # 2. Inject Adaptive Icon Configuration for Android (Forces full-bleed expansion)
+            sed -i '/<\/platform>/i \        <icon background="www/logo.png" foreground="www/logo.png" \/>' config.xml
+            
+            # 3. Clean and overwrite Cordova defaults to prevent legacy shrinking templates
+            find platforms/android/app/src/main/res/ -name "ic_launcher.png" -exec cp www/logo.png {} \;
+            find platforms/android/app/src/main/res/ -name "ic_launcher_foreground.png" -exec cp www/logo.png {} \;
+            find platforms/android/app/src/main/res/ -name "ic_launcher_round.png" -exec cp www/logo.png {} \;
           fi
-
-          cordova plugin add cordova-plugin-camera
-          cordova plugin add cordova-plugin-media-capture
-          cordova plugin add cordova-plugin-file
-          cordova plugin add cordova-plugin-network-information
-          cordova plugin add cordova-plugin-androidx
-
-          cordova build android
+          
+          # Build the production-ready APK
+          cordova build android --device
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: InstaChat-APK
+          name: instaChat-APK
           path: myapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
