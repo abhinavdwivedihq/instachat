@@ -1,1 +1,69 @@
+name: Build InstaChat APK
 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Create Android App
+        run: |
+          cordova create myapp com.abhinav.instachat InstaChat
+          cd myapp
+
+          cordova platform add android
+
+          rm -rf www/*
+
+          cp ../index.html www/index.html
+
+          if [ -f ../manifest.json ]; then
+            cp ../manifest.json www/manifest.json
+          fi
+
+          if [ -f ../splash.png ]; then
+            cp ../splash.png www/splash.png
+          fi
+
+          if [ -f "../IMG_20260707_141932.png" ]; then
+            cp "../IMG_20260707_141932.png" www/logo.png
+          fi
+
+          cordova plugin add cordova-plugin-camera
+          cordova plugin add cordova-plugin-media-capture
+          cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-network-information
+          cordova plugin add cordova-plugin-androidx
+
+          cordova build android
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: InstaChat-APK
+          path: myapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
