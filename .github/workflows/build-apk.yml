@@ -34,6 +34,21 @@ jobs:
           cordova create myapp com.abhinav.instachat instaChat
           cd myapp
           cordova platform add android
+          - name: Create App and Build APK
+        run: |
+          # Fresh project initialize
+          cordova create myapp com.abhinav.instachat instaChat
+          cd myapp
+          cordova platform add android
+
+          # Plugins for Google sign-in return-to-app flow
+          cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-customurlscheme --variable URL_SCHEME=instachat
+          
+          # Copy your main website files
+          rm -rf www/*
+          cp -r ../* www/ || true
+          rm -rf www/myapp
           
           # Copy your main website files
           rm -rf www/*
